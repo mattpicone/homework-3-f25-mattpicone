@@ -8,9 +8,11 @@ def norm_histogram(histogram):
     :param histogram: a numpy ndarray object
     :return: list
     """
-    # please delete the "pass" below and your code starts here...
-    pass
 
+    num_samples = np.sum(histogram)
+    probabilities = histogram / num_samples
+
+    return probabilities
 
 def compute_j(histogram, bin_width, num_samples):
     """
@@ -21,8 +23,13 @@ def compute_j(histogram, bin_width, num_samples):
     :param num_samples: int
     :return: float
     """
-    # please delete the "pass" below and your code starts here...
-    pass
+
+    probabilities = norm_histogram(histogram)
+    all_probabilities = np.sum(probabilities ** 2)
+
+    #formula from histrogram.pdf page 19
+    j = (2 / ((num_samples - 1) * bin_width)) - ((num_samples + 1) / ((num_samples - 1) * bin_width)) * all_probabilities
+    return j
 
 def sweep_n(data, min_val, max_val, min_bins, max_bins):
     """
@@ -45,8 +52,19 @@ def sweep_n(data, min_val, max_val, min_bins, max_bins):
     :param max_bins: int
     :return: list
     """
-    # please delete the "pass" below and your code starts here...
-    pass
+
+    errors = []
+    num_samples = len(data)
+
+    for bins in range(min_bins, max_bins + 1):
+        histogram, fluff, fluff2 = plt.hist(data, bins, range = (min_val, max_val))
+        bin_width = (max_val - min_val) / bins
+        j = compute_j(histogram, bin_width, num_samples)
+        errors.append(j)
+
+
+    return errors
+
 
 def find_min(l):
     """
@@ -61,11 +79,19 @@ def find_min(l):
     :param l: list
     :return: dict: {int: float}
     """
-    # please delete the "pass" below and your code starts here...
-    pass
 
+    smallest_nums = {}
 
+    count = 0
 
+    while count < 3:
+        smallest = np.min(l)
+        index = l.index(smallest)
+        smallest_nums[index] = smallest
+        l[index] = 10000000000000000000000 #very large number so it is not the smallest
+        count += 1
+
+    return smallest_nums
 
 
 # ============================== P2 ==================================
@@ -89,7 +115,13 @@ def get_coordinates(data, each_dist):
     :return: (np.ndarray, np.ndarray)
     """
     # Your code starts here...
-    pass
+
+    from_plot = stats.probplot(data, dist = each_dist)
+    coordinates = from_plot[0]
+    x = coordinates[0]
+    y = coordinates[1]
+
+    return x, y
 
 
 def calculate_distance(x, y):
@@ -101,8 +133,15 @@ def calculate_distance(x, y):
     :param y: float
     :return: float
     """
-    # Your code starts here...
-    pass
+    middle = (x + y) / 2
+
+    dist_x = x - middle
+    dist_y = y - middle
+
+    distance = ((dist_x ** 2) + (dist_y ** 2)) ** 0.5
+
+
+    return distance
 
 
 def find_dist(data):
@@ -113,8 +152,18 @@ def find_dist(data):
     :param data: dict: {str: float}
     :return: (str, float)
     """
-    # Your code starts here...
-    pass
+
+    #big number so it is definitely not the smallest
+    smallest_error = 100000000000
+    found_index = 0
+
+    for x in data:
+        val = data[x]
+        if val < smallest_error:
+            smallest_error = val
+            found_index = x
+
+    return found_index, smallest_error
 
 
 def main(data_file):
@@ -147,13 +196,13 @@ if __name__ == "__main__":
     print(find_min(js))
   ############### Uncomment for P2 #################
 
-    # for each_dataset in [
-    #     "sample_norm.csv",
-    #     "sample_expon.csv",
-    #     "sample_uniform.csv",
-    #     "sample_wald.csv",
-    #     "distA.csv",
-    #     "distB.csv",
-    #     "distC.csv",
-    # ]:
-    #     print(main(each_dataset))
+    for each_dataset in [
+        "sample_norm.csv",
+        "sample_expon.csv",
+        "sample_uniform.csv",
+        "sample_wald.csv",
+        "distA.csv",
+        "distB.csv",
+        "distC.csv",
+    ]:
+        print(main(each_dataset))
